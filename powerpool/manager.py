@@ -16,7 +16,7 @@ import logging
 from celery import Celery
 from pprint import pformat
 
-from .netmon import monitor_network, monitor_nodes
+from .netmon import MonitorNetwork, monitor_nodes, RelayServer
 from .stratum_server import StratumServer
 from .agent_server import AgentServer
 from .stats import stat_rotater, StatManager
@@ -62,11 +62,13 @@ def net_runner(net_state, config, stratum_clients, server_state, celery,
                exit_event):
     logger.info("Network monitor starting up; Thread ID {}"
                 .format(threading.current_thread()))
-    network = Greenlet(monitor_network, stratum_clients, net_state, config,
-                       server_state, celery)
+    network = MonitorNetwork(stratum_clients, net_state, config,
+                             server_state, celery)
     nodes = Greenlet(monitor_nodes, config, net_state)
     nodes.start()
     network.start()
+    RelayServer((config['block_notif']['address'], config['block_notif']['port']),
+                config, network).serve_forever()
     try:
         exit_event.wait()
     finally:
@@ -142,8 +144,7 @@ def main():
                          'accepted_types': ['temp', 'status', 'hashrate', 'thresholds']},
                   pow_func='ltc_scrypt',
                   aliases={},
-                  block_poll=0.2,
-                  job_generate_int=75,
+                  job_generate_int=30,
                   rpc_ping_int=2,
                   keep_share=600,
                   send_new_block=True,

@@ -22,6 +22,14 @@ celery_task_prefix: simplecoin.tasks
 #    port: 3333
 #    address: 0.0.0.0
 
+# The udp socket that we listen for block notifications on. This is the port
+# that the notifier will send to.
+#monitor:
+#    enabled: True
+#    DEBUG: False
+#    address: 127.0.0.1
+#    port: 3855
+
 #vardiff:
 #    # should we use variable difficulty?
 #    enabled: False
@@ -56,12 +64,9 @@ celery_task_prefix: simplecoin.tasks
 # powerpools then only one needs to do this
 #send_new_block: True
 
-# time between checking live rpc for new blocks... lower means less stale
-# shares (in seconds)
-#block_poll: 0.2
-# block polls between generating a new job for workers (running gbt, etc)
-# time = block_poll * job_generate_int
-#job_generate_int: 75
+# time between generating a new job for workers (running gbt, etc)
+#job_generate_int: 30
+# Time between pinging down RPC interfaces to see if they're up again
 #rpc_ping_int: 2
 
 # aliases allow you to automatically translate a friendly username to to a
